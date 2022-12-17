@@ -5,8 +5,8 @@
   "main": "./server/server.js",
   "scripts": {
     "server": "nodemon ./server/server.js",
-    "dev": "webpack serve --config ./client/webpack-config/dev.js --hot",
-    "build": "webpack --config ./client/webpack-config/production.js"
+    "dev": "webpack serve --config ./frontEnd/webpack-config/dev.js --hot",
+    "build": "webpack --config ./frontEnd/webpack-config/production.js"
   },
   "keywords": [],
   "author": "",
@@ -15,12 +15,15 @@
     "body-parser": "^1.20.1",
     "cors": "^2.8.4",
     "express": "^4.18.2",
+    "gsap": "^3.11.3",
+    "howler": "^2.2.3",
     "module_name": "^1.0.0",
     "nodemon": "^2.0.20",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "socket.io": "^4.5.4",
     "socket.io-client": "^4.5.4",
+    "three": "^0.147.0",
     "uuid": "^9.0.0",
     "wrtc": "^0.4.7"
   },
@@ -29,7 +32,9 @@
     "@babel/preset-env": "^7.20.2",
     "@babel/preset-react": "^7.18.6",
     "babel-loader": "^9.1.0",
+    "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.3",
+    "dat-gui": "^0.5.0",
     "html-webpack-plugin": "^5.5.0",
     "mini-css-extract-plugin": "^2.7.2",
     "sass": "^1.56.2",

@@ -1,20 +1,29 @@
 const path = require("path")
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
-    entry : "./client/src/main.js",
+    entry : "./frontEnd/src/index.js",
     output : {
         filename : 'bundele.js',
         path : path.resolve(__dirname, '../../dist')
     },
     plugins: [
         new HtmlWebpackPlugin({
-            template : './client/src/index.html'
+            template : './frontEnd/src/index.html'
         }),
         new MiniCssExtractPlugin({
-            filename : 'manager.css'
+            filename : 'static/styles.css',
         }),
+        new CopyPlugin({
+            patterns: [
+                { 
+                    from: "./frontEnd/src/assets",
+                    to: path.resolve(__dirname, '../../dist/static')
+                },
+            ],
+          }),
     ],
     module : {
         rules : [
