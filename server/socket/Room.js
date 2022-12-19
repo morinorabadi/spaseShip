@@ -28,11 +28,13 @@ class Room
         this.info = {
             name : roomName,
             ownerId : socket.id,
-            ownerName : socket.username,
+            ownerName : socket.data.username,
+            playerCount : 0
         }
 
         const socketsMap = new Map()
         const gameInfo = new Map()
+        const peerConnections = new Map()
 
 
         let lastplayerGameId = 0
@@ -45,8 +47,6 @@ class Room
         /**
          * WebRTC
          */
-        const peerConnections = new Map()
-
         // create connection
         this.createRTCConnection = async (socketId) => {
             // create WebRtcConnection
@@ -81,19 +81,23 @@ class Room
             if (newInfo.t > lastInfo.t) { gameInfo.set(newInfo.i,newInfo) }
         }
 
-
         /**
-         * handele socket join
+         * socket events
          */
+
+        // socket join
         this.socketJoin = (socket) => {
             // add socket to room
             socket.join(this.id)
             socket.data.room = this.id
-
+            this.info.playerCount++;
             // create gameId for this socket
             const gameId = createGameId()
             socket.data.gameId = gameId
-
+            socket.data.serialize = () => { return { 
+                username : socket.data.username,
+                id : socket.id
+            }}
             // add socket to map
             socketsMap.set(socket.id,socket)
 
@@ -124,28 +128,66 @@ class Room
 
             // send some information to this socket
             // and wait until socket emit "load-over" emit
-            const response = { status : 200 , information : { roomName : this.info.name, foor : Math.random()} }
+            const response = { status : 200 , information : { room : serialize() } }
             this.emit(socket.id,"room-load-information",response)
 
             // send new player login to others is this room
-            const roomRespone = { status : 200, player: { username : socket.data.username, playerId : socket.id, playerGameId : gameId } }
-            this.emit(this.id, "room-new-player", )
+            sendPlayerJoinOrLeft(true,socket)
         }
-        // call socketJoin for owner socket 
-        this.socketJoin(socket)
 
-        // fix socket Disconnect   
+        // socket disconnect
         this.socketDisconnect = (socketId) => {
-            this.emit(this.id,"room-player-left", { status : 200, playerId : socketId} )
+            if ( socketsMap.has(socketId) ){                
+                this.info.playerCount--;
+                // find socket gameId
+                const socket = socketsMap.get(socketId)
+                const gameId = socket.data.gameId
+                // clean up
+                socketsMap.delete(socketId)
+                if (gameInfo.has(gameId)){ gameInfo.delete(gameId) }
+                if (peerConnections.has(socketId)){ gameInfo.delete(gameId) }
+                // send out
+                sendPlayerJoinOrLeft(false,socket)
+            } else {
+                console.log("404 not founded in socket disconnect");
+            }
         }
 
+        const sendPlayerJoinOrLeft = (isJoin,socket) => {
+            const response = { status : 200 }
+            response.information = {}
+            response.information.isJoin = isJoin
+            response.information.player = socket.data.serialize()
+            response.information.room = serialize()
+            this.emit(this.id,"room-player-changes", response )
+        }
+        /**
+         * global room functions
+         */
+
+        // delete entire room
         this.kill = () => {
             // send room destroyed to all player in room
             this.emit(this.id,"room-force-leave", { status : 200 } )
             
             // close all RTCPeerConnections
-            peerConnections.forEach(( peer, id) => { peer.close() })
+            peerConnections.forEach(( peer, _) => { peer.close() })
         }
+
+        // return information about this room
+        const serialize = () => {
+            const players = []
+            socketsMap.forEach((socket, id ) => { 
+                players.push({name : socket.data.username,id : id})
+            })
+            return {
+                ...this.info,
+                players
+            }
+        }
+
+        // call socketJoin for owner socket 
+        this.socketJoin(socket)
     }
 }
 

@@ -8,6 +8,8 @@ export default class ClinetSocket
         this.onUsername = null
         this.onAvailableRoom = null
         this.onLoadInformation = null
+        this.onPlayerJoinLeft = null
+        // game
         this.onStartGame = null
         this.onUpdateData = null
 
@@ -44,7 +46,7 @@ export default class ClinetSocket
             socket.on("room-load-information", response => {
                 if (this.responseChech(response)){
                     this.onLoadInformation(response.information)
-                    this.emit("load-over")
+                    // this.emit("load-over")
                 }
             })
 
@@ -65,6 +67,22 @@ export default class ClinetSocket
                     this.onStartGame()
                 }
             })
+
+            // if player some player join or left room
+            socket.on("room-player-changes", response => {
+                if (this.responseChech(response)){
+                    console.log(response);
+                    this.onPlayerJoinLeft(response.information)
+                }
+            })
+
+            // if player some player join or left room
+            socket.on("room-force-leave", response => {
+                if (this.responseChech(response)){
+                    this.roomForceLeave()
+                }
+            })
+
         })
     }
 

@@ -57,6 +57,7 @@ class SocketManager
                         // if disconnected socket is owner we will delete room
                         room.kill()
                         rooms.delete(room.id)
+                        sendAvailableRoom()
                     } else {
                         // else we just say to room halndele this socket left 
                         room.socketDisconnect(socket.id)
@@ -94,7 +95,7 @@ class SocketManager
         // send out room informations
         const sendAvailableRoom = () => {
             const response = { status : 200, rooms : [] }
-            rooms.forEach((room, id) => { response.rooms.push({id, name : room.info.name}) })
+            rooms.forEach((room, id) => { response.rooms.push({id, ...room.info}) })
             this.emit(clientsWithOutRoom,"server-available-room",response)
         }
 

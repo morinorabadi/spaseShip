@@ -4,7 +4,7 @@
   "description": "",
   "main": "./server/server.js",
   "scripts": {
-    "server": "nodemon ./server/server.js",
+    "server": "nodemon --watch server ./server/server.js",
     "dev": "webpack serve --config ./frontEnd/webpack-config/dev.js --hot",
     "build": "webpack --config ./frontEnd/webpack-config/production.js"
   },
